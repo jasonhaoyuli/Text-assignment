@@ -1,0 +1,48 @@
+---
+title: "Text assignment"
+author: "Haoyu Li"
+date: "11/17/2020"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message = FALSE, warning = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(tnum)
+tnum.authorize()
+```
+
+We find out the sentence that have the word "pride".
+
+Then we plot the graph that shows us the path of each sentence that include word "pride"
+```{r}
+num2<-tnum.query("*pride* has text = REGEXP(\"pride\")",max=50)
+text_pride<-tnum.objectsToDf(num2)
+graph_pride<-tnum.makePhraseGraphFromPathList(text_pride$subject)
+tnum.plotGraph(graph_pride)
+```
+
+
+Then We add tags to each sentences.
+
+
+```{r}
+tnum.tagByQuery("*pride* has text = REGEXP(\"pride\")","Reference:Pride")
+num2<-tnum.query("*pride* has text = REGEXP(\"pride\")",max=40)
+text_pride<-tnum.objectsToDf(num2)
+```
+
+
+Now we count the tags to show the distribution of the word "pride" in each chapter
+
+
+```{r}
+text_pride_count<-separate(text_pride,col=subject,c("book","chapter","other"),sep="/",remove = FALSE)
+count_pride<-text_pride_count%>%group_by(chapter)%>%summarise(count=n())
+ggplot(data=count_pride,mapping=aes(x=chapter,y=count,fill=chapter))+geom_bar(stat = "identity")+labs(x="Chapters",y="number of pride appeared",title = "word pride appear in each chapter")+coord_flip()
+```
